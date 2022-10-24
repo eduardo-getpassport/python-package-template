@@ -16,6 +16,7 @@ on:
     - synchronize
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   conventional-commits:
@@ -59,6 +60,7 @@ jobs:
     uses: ./.github/workflows/build.yaml
     permissions:
       contents: read
+      pull-requests: write
     # If the build workflow needs to access secrets, they need to be passed using `secrets: inherit`.
     # See https://docs.github.com/en/actions/using-workflows/reusing-workflows to learn more.
     # See  https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions
