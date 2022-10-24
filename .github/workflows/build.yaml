@@ -35,9 +35,35 @@ jobs:
         python: ['3.9', '3.10']
     steps:
     - name: Harden Runner
+      id: audit
+      continue-on-error: true
       uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95 # v1.4.5
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+    - name: Post audit output
+      id: post-audit
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request' || steps.init.outputs.exit_code == 1
+      env:
+        OUTPUT: "Audit\n${{ steps.audit.outputs.stdout }}"
+      with:
+        script: |
+            #### pip Audit output \`${{ steps.init.outcome }}\`
+
+             <details><summary>Show audit</summary>
+
+             \`\`\`\n
+             ${process.env.OUTPUT}
+             \`\`\`
+
+             </details>
+
+             github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
     - name: Check out repository
       uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # v3.0.2
       with:
