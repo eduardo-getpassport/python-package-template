@@ -62,7 +62,18 @@ jobs:
       run: make dist
     # Audit all currently installed packages for security vulnerabilities.
     - name: Audit installed packages
-      run: make audit
+      id: audit-packages
+      continue-on-error: true
+      run: make --silent audit > vulnerabilities.txt
+    - name: Upload Artifact
+      id: upload-audit-artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: vulnerabilities.txt
+        path: .
+        if-no-files-found: error
+        retention-days: 1
+      if: steps.audit-packages.outputs.exit_code == 1
     - name: Compute package hash
       if: matrix.os == env.ARTIFACT_OS && matrix.python == env.ARTIFACT_PYTHON
       id: compute-hash
