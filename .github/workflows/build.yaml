@@ -16,6 +16,7 @@ on:
         value: ${{ jobs.build.outputs.artifacts-sha256 }}
 permissions:
   contents: read
+  pull-requests: write
 env:
   ARTIFACT_OS: ubuntu-latest # The default OS for release.
   ARTIFACT_PYTHON: '3.10' # The default Python version for release.
@@ -35,35 +36,9 @@ jobs:
         python: ['3.9', '3.10']
     steps:
     - name: Harden Runner
-      id: audit
-      continue-on-error: true
       uses: step-security/harden-runner@dd2c410b088af7c0dc8046f3ac9a8f4148492a95 # v1.4.5
       with:
         egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
-    - name: Post audit output
-      id: post-audit
-      uses: actions/github-script@v6
-      if: github.event_name == 'pull_request' || steps.init.outputs.exit_code == 1
-      env:
-        OUTPUT: "Audit\n${{ steps.audit.outputs.stdout }}"
-      with:
-        script: |
-            #### pip Audit output \`${{ steps.init.outcome }}\`
-
-             <details><summary>Show audit</summary>
-
-             \`\`\`\n
-             ${process.env.OUTPUT}
-             \`\`\`
-
-             </details>
-
-             github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output
-              })
     - name: Check out repository
       uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # v3.0.2
       with:
@@ -88,7 +63,15 @@ jobs:
       run: make dist
     # Audit all currently installed packages for security vulnerabilities.
     - name: Audit installed packages
-      run: make audit
+      id: audit-packages
+      continue-on-error: true
+      run: make audit > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment
+    - name: Comment vulnerabilities on PR
+      uses: marocchino/sticky-pull-request-comment@v2
+      id: comment
+      if: steps.audit-packages.outputs.exit_code == 1
+      with:
+        path: vulnerabilities.txt
     - name: Compute package hash
       if: matrix.os == env.ARTIFACT_OS && matrix.python == env.ARTIFACT_PYTHON
       id: compute-hash
