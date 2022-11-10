@@ -66,17 +66,12 @@ jobs:
     - name: Audit installed packages
       id: audit-packages
       continue-on-error: true
-      run: make --silent audit > vulnerabilities.txt && ls -al && cat vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment # > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt 
-
-    # - name: Comment vulnerabilities on PR
-    #   uses: marocchino/sticky-pull-request-comment@v2
-    #   id: comment
-    #   if: steps.audit-packages.outputs.exit_code == 1
-    #   with:
-    #     path: vulnerabilities.txt
+      run: make --silent audit > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment # > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt 
 
     - name: comment PR
+      id: comment-pr
       run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
+      if: steps.audit-packages.outputs.exit_code == 1
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
