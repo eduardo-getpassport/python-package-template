@@ -16,7 +16,6 @@ on:
         value: ${{ jobs.build.outputs.artifacts-sha256 }}
 permissions:
   contents: read
-  pull-requests: write
 env:
   ARTIFACT_OS: ubuntu-latest # The default OS for release.
   ARTIFACT_PYTHON: '3.10' # The default Python version for release.
@@ -66,15 +65,13 @@ jobs:
     - name: Audit installed packages
       id: audit-packages
       continue-on-error: true
-      run: make --silent audit > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment # > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt 
-
+      run: make --silent audit > vulnerabilities.txt
     - name: comment PR
       id: comment-pr
       run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
       if: steps.audit-packages.outputs.exit_code == 1
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Compute package hash
       if: matrix.os == env.ARTIFACT_OS && matrix.python == env.ARTIFACT_PYTHON
       id: compute-hash
