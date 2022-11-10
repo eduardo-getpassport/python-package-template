@@ -32,7 +32,7 @@ jobs:
       matrix:
         # It is recommended to pin a Runner version specifically:
         # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
         python: ['3.9', '3.10']
     steps:
     - name: Harden Runner
@@ -61,11 +61,12 @@ jobs:
       # those targets first and only builds the package if they succeed.
       # Build the sdist and wheel distribution of the package and docs as a zip file.
       run: make dist
+      continue-on-error: true
     # Audit all currently installed packages for security vulnerabilities.
     - name: Audit installed packages
       id: audit-packages
       continue-on-error: true
-      run: make audit > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment
+      run: make --silent audit > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment # > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt 
     - name: Comment vulnerabilities on PR
       uses: marocchino/sticky-pull-request-comment@v2
       id: comment
