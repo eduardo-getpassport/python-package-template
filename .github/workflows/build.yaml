@@ -66,7 +66,7 @@ jobs:
     - name: Audit installed packages
       id: audit-packages
       continue-on-error: true
-      run: make audit > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment # > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt 
+      run: make audit > vulnerabilities.txt && ls -al && cat vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment # > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt 
 
     # - name: Comment vulnerabilities on PR
     #   uses: marocchino/sticky-pull-request-comment@v2
@@ -76,7 +76,7 @@ jobs:
     #     path: vulnerabilities.txt
 
     - name: comment PR
-      run: gh pr comment ${{ github.event.number }} --F vulnerabilities.txt
+      run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
 
 
     - name: Compute package hash
