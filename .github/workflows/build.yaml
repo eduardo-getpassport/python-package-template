@@ -60,7 +60,6 @@ jobs:
       # those targets first and only builds the package if they succeed.
       # Build the sdist and wheel distribution of the package and docs as a zip file.
       run: make dist
-      continue-on-error: true
     # Audit all currently installed packages for security vulnerabilities.
     - name: Audit installed packages
       id: audit-packages
