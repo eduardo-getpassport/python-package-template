@@ -16,7 +16,6 @@ on:
         value: ${{ jobs.build.outputs.artifacts-sha256 }}
 permissions:
   contents: read
-  pull-requests: write
 env:
   ARTIFACT_OS: ubuntu-latest # The default OS for release.
   ARTIFACT_PYTHON: '3.10' # The default Python version for release.
@@ -61,17 +60,21 @@ jobs:
       # those targets first and only builds the package if they succeed.
       # Build the sdist and wheel distribution of the package and docs as a zip file.
       run: make dist
+      continue-on-error: true
     # Audit all currently installed packages for security vulnerabilities.
     - name: Audit installed packages
       id: audit-packages
       continue-on-error: true
-      run: make audit > raw-vulnerabilities.txt && tail -n +5 raw-vulnerabilities.txt > vulnerabilities.txt # Saving the command output and tailing from line 5 to avoid having the command on the PR comment
-    - name: Comment vulnerabilities on PR
-      uses: marocchino/sticky-pull-request-comment@v2
-      id: comment
-      if: steps.audit-packages.outputs.exit_code == 1
+      run: make --silent audit > vulnerabilities.txt
+    - name: Upload Artifact
+      id: upload-audit-artifact
+      uses: actions/upload-artifact@v3
       with:
-        path: vulnerabilities.txt
+        name: vulnerabilities.txt
+        path: .
+        if-no-files-found: error
+        retention-days: 1
+      if: steps.audit-packages.outputs.exit_code == 1
     - name: Compute package hash
       if: matrix.os == env.ARTIFACT_OS && matrix.python == env.ARTIFACT_PYTHON
       id: compute-hash
