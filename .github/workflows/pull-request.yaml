@@ -68,7 +68,7 @@ jobs:
   comment-pr:
     name: Comment PR with Audit results
     needs: build
-    if: step.audit-packages.outputs.exit_code == 1
+    if: steps.audit-packages.outputs.exit_code == 1
     runs-on: ubuntu-latest
     steps:
     - name: Download artifact from Build
