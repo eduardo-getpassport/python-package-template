@@ -65,12 +65,13 @@ jobs:
     - name: Audit installed packages
       id: audit-packages
       continue-on-error: true
-      run: make --silent audit > vulnerabilities.txt
+      run: make --silent audit > vulnerabilities.txt && pwd
 
     - name: 'Upload Artifact'
       uses: actions/upload-artifact@v3
       with:
         name: vulnerabilities.txt
+        path: .
         retention-days: 1
       #if: steps.audit-packages.outputs.exit_code == 1
 
