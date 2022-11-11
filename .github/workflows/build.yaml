@@ -72,7 +72,7 @@ jobs:
       with:
         name: vulnerabilities.txt
         retention-days: 1
-      if: steps.audit-packages.outputs.exit_code == 1
+      #if: steps.audit-packages.outputs.exit_code == 1
 
     # - name: comment PR
     #   id: comment-pr

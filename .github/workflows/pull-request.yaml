@@ -72,12 +72,12 @@ jobs:
     steps:
     - name: Download artifact from Build
       uses: actions/download-artifact@v3 
-      if: steps.audit-packages.outputs.exit_code == 1 
+      #if: steps.audit-packages.outputs.exit_code == 1 
       with:
         name: vulnerabilities.txt
     - name: comment PR
       id: comment-pr
       run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
-      if: steps.audit-packages.outputs.exit_code == 1
+      #if: steps.audit-packages.outputs.exit_code == 1
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
