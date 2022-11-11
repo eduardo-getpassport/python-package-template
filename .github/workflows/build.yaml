@@ -66,12 +66,22 @@ jobs:
       id: audit-packages
       continue-on-error: true
       run: make --silent audit > vulnerabilities.txt
-    - name: comment PR
-      id: comment-pr
-      run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
-      #if: steps.audit-packages.outputs.exit_code == 1
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: vulnerabilities.txt
+        retention-days: 1
+      if: steps.audit-packages.outputs.exit_code == 1
+
+    # - name: comment PR
+    #   id: comment-pr
+    #   run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
+    #   #if: steps.audit-packages.outputs.exit_code == 1
+    #   env:
+    #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
     - name: Compute package hash
       if: matrix.os == env.ARTIFACT_OS && matrix.python == env.ARTIFACT_PYTHON
       id: compute-hash

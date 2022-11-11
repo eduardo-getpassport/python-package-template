@@ -60,8 +60,24 @@ jobs:
     uses: ./.github/workflows/build.yaml
     permissions:
       contents: read
-      pull-requests: write
     # If the build workflow needs to access secrets, they need to be passed using `secrets: inherit`.
     # See https://docs.github.com/en/actions/using-workflows/reusing-workflows to learn more.
     # See  https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions
     # for the security recommendations.
+
+  comment-pr:
+    name: Comment PR with Audit results
+    needs: build
+    if: jobs.build.step.audit-packages.outputs.exit_code == 1
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact from Build
+      uses: actions/download-artifact@v3  
+      with:
+        name: vulnerabilities.txt
+    - name: comment PR
+      id: comment-pr
+      run: gh pr comment ${{ github.event.number }} --body-file vulnerabilities.txt
+      #if: steps.audit-packages.outputs.exit_code == 1
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
