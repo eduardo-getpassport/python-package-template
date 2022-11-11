@@ -71,7 +71,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: vulnerabilities.txt
-        path: .
+        path: ./vulnerabilities.txt
         retention-days: 1
       #if: steps.audit-packages.outputs.exit_code == 1
 
