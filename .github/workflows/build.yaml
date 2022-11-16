@@ -88,7 +88,7 @@ jobs:
         path: .
         if-no-files-found: error
         retention-days: 1
-      if: steps.audit-packages.outputs.exit_code == 1
+      #if: steps.audit-packages.outputs.exit_code == 1
 
     # Build the sdist and wheel distribution of the package and docs as a zip file.
     # We don't need to check and test the package separately because `make dist` runs
